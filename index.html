@@ -29,12 +29,86 @@
         const map = new mapboxgl.Map({
             container: 'map', // container ID
             style: 'mapbox://styles/serserser/cku0sad153cdu18mfdejzqo87', // style URL
-            center: [-74.5, 40], // starting position
-            zoom: 9 // starting zoom
+            center: { lng: -98.10019703622216, lat: 26.555935308408706 }, // starting position
+            zoom: 3.5 // starting zoom
         });
 
         // Add zoom and rotation controls to the map.
         map.addControl(new mapboxgl.NavigationControl());
+
+
+        map.on('load', () => {
+            map.addSource('data', {
+                type: 'geojson',
+                // Use a URL for the value for the `data` property.
+                data: 'gz_2010_us_040_00_500k.json'
+            });
+
+            map.addLayer({
+                'id': 'route',
+                'type': 'line',
+                'source': 'data',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': '#888',
+                    'line-width': 2
+                }
+            });
+
+
+            map.addSource('pins', {
+                type: 'geojson',
+                // Use a URL for the value for the `data` property.
+                data: 'data.json'
+            });
+
+            map.addLayer({
+                'id': 'pins-layer',
+                'type': 'circle',
+                'source': 'pins',
+                'paint': {
+                    'circle-radius': 8,
+                    'circle-stroke-width': 2,
+                    'circle-color': 'red',
+                    'circle-stroke-color': 'white'
+                }
+            });
+
+
+            map.on('click', 'pins-layer', (e) => {
+                // Copy coordinates array.
+                const coordinates = e.features[0].geometry.coordinates.slice();
+                const description = e.features[0].properties.description;
+
+                // Ensure that if the map is zoomed out such that multiple
+                // copies of the feature are visible, the popup appears
+                // over the copy being pointed to.
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+
+                new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(description)
+                    .addTo(map);
+            });
+
+            // Change the cursor to a pointer when the mouse is over the places layer.
+            map.on('mouseenter', 'pins-layer', () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            // Change it back to a pointer when it leaves.
+            map.on('mouseleave', 'pins-layer', () => {
+                map.getCanvas().style.cursor = '';
+            });
+
+        });
+
+
     </script>
 
 </body>
