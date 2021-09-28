@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Animate map camera around a point</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <button style="position: absolute;top:100px;left:100px;padding:20px;" id="animate">VIEW </button>
+    <div style="background-color:white;position: absolute;top:160px;left:100px;padding:20px;" id="info"></div>
+    <script>
+
+        const info = document.getElementById("info")
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vyc2Vyc2VyIiwiYSI6ImNrZnBpaWF5azBpMWMyeHBmdzJpdno1NzgifQ.4vBDF2DNuk-beXljllf3Yg';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v10',
+            center: [144.84971, -37.81385],
+            zoom: 15.5,
+            pitch: 45
+        });
+
+        map.addControl(new mapboxgl.NavigationControl());
+
+        var r;
+        function rotateCamera(timestamp) {
+
+            const angle = (timestamp / 100) % 360;
+            map.rotateTo(angle, { duration: 0 });
+            getInfo()
+            // Request the next frame of the animation.
+            r = requestAnimationFrame(rotateCamera);
+
+        }
+
+
+        var a;
+        function animateTo2D() {
+
+            const cb = map.getBearing() + 2
+            const cp = map.getPitch() - 1;
+            const zm = map.getZoom() - 0.02;
+
+            map.setBearing(cb)
+            map.setPitch(cp)
+            map.setZoom(zm)
+
+
+            getInfo()
+
+            if (Math.abs(cb) <= 3 && cp <= 0) {
+                console.log('stop',);
+                map.setBearing(0)
+                cancelAnimationFrame(a)
+                return;
+            }
+            a = requestAnimationFrame(animateTo2D);
+        }
+
+        function animateTo3D() {
+
+            const cb = map.getBearing() + 2
+            let cp = map.getPitch() + 1;
+            const zm = map.getZoom() + 0.02;
+
+            if (cp >= 45) {
+                cp = 45
+            }
+
+
+            map.setBearing(cb)
+            map.setPitch(cp)
+            map.setZoom(zm)
+
+            getInfo()
+
+
+            if (cp >= 45 && zm >= 15) {
+                console.log('stop',);
+                map.setBearing(0)
+                cancelAnimationFrame(a)
+                rotateCamera(0)
+                return;
+            }
+            a = requestAnimationFrame(animateTo3D);
+        }
+
+        function getInfo() {
+
+            const b = map.getBearing()
+            const p = map.getPitch();
+            const z = map.getZoom();
+
+            info.innerHTML = `
+                bearing: ${b}<br>
+                pitch: ${p}<br>
+                zoom: ${z}<br>
+            `
+        }
+
+        let set = true
+        document.getElementById("animate").addEventListener("click", () => {
+
+            if (set) {
+                cancelAnimationFrame(r)
+                animateTo2D()
+            } else {
+                animateTo3D()
+            }
+
+            set = !set
+        })
+
+        map.on('load', () => {
+            // Start the animation.
+
+            rotateCamera(0)
+            // Add 3d buildings and remove label layers to enhance the map
+            const layers = map.getStyle().layers;
+            for (const layer of layers) {
+                if (layer.type === 'symbol' && layer.layout['text-field']) {
+                    // remove text labels
+                    map.removeLayer(layer.id);
+                }
+            }
+
+            map.addLayer({
+                'id': '3d-buildings',
+                'source': 'composite',
+                'source-layer': 'building',
+                'filter': ['==', 'extrude', 'true'],
+                'type': 'fill-extrusion',
+                'minzoom': 15,
+                'paint': {
+                    'fill-extrusion-color': '#aaa',
+
+                    // use an 'interpolate' expression to add a smooth transition effect to the
+                    // buildings as the user zooms in
+                    'fill-extrusion-height': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        15,
+                        0,
+                        15.05,
+                        ['get', 'height']
+                    ],
+                    'fill-extrusion-base': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        15,
+                        0,
+                        15.05,
+                        ['get', 'min_height']
+                    ],
+                    'fill-extrusion-opacity': 0.6
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
