@@ -19,12 +19,119 @@
             bottom: 0;
             width: 100%;
         }
+
+        .mapboxgl-popup-tip {
+            display: none;
+        }
+
+        .mapboxgl-popup-content {
+            width: 300px;
+            padding: 10px 10px 15px;
+        }
+
+        .mpopup .mapboxgl-popup-content {
+            border: 1px solid #B4BAC1;
+        }
+
+        .mapboxgl-popup-close-button {
+            background: #2D435D;
+            width: 100%;
+            text-align: end;
+        }
+
+        .mapboxgl-popup-close-button:hover {
+            background: #2D435D;
+            text-align: end;
+        }
+
+        .popup-header {
+            background-color: #2D435D;
+        }
+
+        .circle {
+            border-radius: 50%;
+            box-shadow: 0px 0px 0px 5px #F39717, 0px 0px 0px 10px white, 0px 0px 0px 14px #F39717;
+            width: 5px;
+            height: 5px;
+            margin: 20px;
+            color: #F39717;
+            background-color: #F39717;
+        }
+
+        .green {
+            box-shadow: 0px 0px 0px 5px #00B24A, 0px 0px 0px 10px white, 0px 0px 0px 14px #00B24A;
+            background-color: #00B24A;
+        }
+
+        .dblue {
+            box-shadow: 0px 0px 0px 5px #2D435D, 0px 0px 0px 10px white, 0px 0px 0px 14px #2D435D;
+            background-color: #2D435D;
+        }
+
+        .blue {
+            box-shadow: 0px 0px 0px 5px #005BB7, 0px 0px 0px 10px white, 0px 0px 0px 14px #005BB7;
+            background-color: #005BB7;
+        }
+
+        #legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            border: 3px solid gray;
+            border-radius: 50px;
+            display: flex;
+            z-index: 1000;
+            font-weight: bold;
+            padding: 5px 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .orange_ {
+            color: #F39717;
+        }
+
+        .green_ {
+            color: #00B24A;
+        }
+
+        .dblue_ {
+            color: #2D435D;
+        }
+
+        .blue_ {
+            color: #005BB7;
+        }
     </style>
 </head>
 
 <body>
+    <div id="legend">
+        <div class="legend-item">
+            <div class="circle "></div>
+            <div class="orange_">Type 1</div>
+        </div>
+        <div class="legend-item">
+            <div class="circle green"></div>
+            <div class="green_">Type 1</div>
+        </div>
+        <div class="legend-item">
+            <div class="circle dblue"></div>
+            <div class="dblue_">Type 1</div>
+        </div>
+        <div class="legend-item">
+            <div class="circle blue"></div>
+            <div class="blue_">Type 1</div>
+        </div>
+
+    </div>
     <div id="map"></div>
     <script>
+        //d.features.forEach(i=>i.properties.color = ['#F39717','#00B24A', '#2D435D',"#005BB7"].random())
         mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vyc2Vyc2VyIiwiYSI6ImNrZnBpaWF5azBpMWMyeHBmdzJpdno1NzgifQ.4vBDF2DNuk-beXljllf3Yg';
         const map = new mapboxgl.Map({
             container: 'map', // container ID
@@ -32,12 +139,15 @@
             center: { lng: -98.10019703622216, lat: 26.555935308408706 }, // starting position
             zoom: 3.5 // starting zoom
         });
-
         // Add zoom and rotation controls to the map.
         map.addControl(new mapboxgl.NavigationControl());
 
 
         map.on('load', () => {
+
+
+
+
             map.addSource('data', {
                 type: 'geojson',
                 // Use a URL for the value for the `data` property.
@@ -66,22 +176,33 @@
             });
 
             map.addLayer({
-                'id': 'pins-layer',
+                'id': 'pins-stroke',
                 'type': 'circle',
                 'source': 'pins',
                 'paint': {
                     'circle-radius': 8,
-                    'circle-stroke-width': 2,
-                    'circle-color': 'red',
-                    'circle-stroke-color': 'white'
+                    "circle-opacity": 0,
+                    "circle-stroke-width": 2,
+                    "circle-stroke-color": ['get', 'color'],
+                }
+            });
+            map.addLayer({
+                'id': 'pins-layer',
+                'type': 'circle',
+                'source': 'pins',
+                'paint': {
+                    'circle-radius': 4,
+                    'circle-stroke-width': 0,
+                    'circle-color': ['get', 'color'],
+
                 }
             });
 
 
-            map.on('click', 'pins-layer', (e) => {
+            map.on('click', 'pins-stroke', (e) => {
                 // Copy coordinates array.
                 const coordinates = e.features[0].geometry.coordinates.slice();
-                const description = e.features[0].properties.description;
+                const props = e.features[0].properties;
 
                 // Ensure that if the map is zoomed out such that multiple
                 // copies of the feature are visible, the popup appears
@@ -90,19 +211,45 @@
                     coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
                 }
 
-                new mapboxgl.Popup()
+                const text = `
+                    
+                <div style="">
+                    <div>
+                        <h1>${props.name}</h1>
+                        <h4>Location</h4>
+                    </div>
+                    <div style="display:flex;justify-content: space-between; ">
+
+                        <div>
+                            <div>Annual Output</div>
+                            <div>48 xyz</div>
+                        </div>
+                        <div>
+                            <div>Another Figure</div>
+                            <div>99999 abc</div>
+                        </div>
+
+                    </div>
+                </div>
+
+                `
+
+                new mapboxgl.Popup({
+                    className: "mpopup",
+                    maxWidth: 300
+                })
                     .setLngLat(coordinates)
-                    .setHTML(description)
+                    .setHTML(text)
                     .addTo(map);
             });
 
             // Change the cursor to a pointer when the mouse is over the places layer.
-            map.on('mouseenter', 'pins-layer', () => {
+            map.on('mouseenter', 'pins-stroke', () => {
                 map.getCanvas().style.cursor = 'pointer';
             });
 
             // Change it back to a pointer when it leaves.
-            map.on('mouseleave', 'pins-layer', () => {
+            map.on('mouseleave', 'pins-stroke', () => {
                 map.getCanvas().style.cursor = '';
             });
 
