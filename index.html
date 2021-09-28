@@ -7,7 +7,34 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.js"></script>
+
+
     <style>
+        @font-face {
+            font-family: "archia-bold";
+            src: url(fonts/archia-bold-webfont.woff);
+        }
+
+        @font-face {
+            font-family: "proxima-reg";
+            src: url(fonts/Proxima\ Nova\ Reg.woff);
+        }
+
+        @font-face {
+            font-family: "proxima-bold";
+            src: url(fonts/Proxima\ Nova\ Bold.woff);
+        }
+
+        @font-face {
+            font-family: "archia-med";
+            src: url(fonts/Archia-Medium.otf);
+        }
+
+        .archia-bold {
+            font-family: "archia-bold";
+        }
+
+
         body {
             margin: 0;
             padding: 0;
@@ -18,6 +45,33 @@
             top: 0;
             bottom: 0;
             width: 100%;
+        }
+
+        h1 {
+            font-family: "archia-bold";
+            color: #2D435D;
+            font-size: 29px;
+        }
+
+        h4 {
+            font-family: "proxima-reg";
+            color: #818181;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-top: 0px;
+        }
+
+        .title {
+            font-family: "proxima-reg";
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #2D2D2D;
+        }
+
+        .data {
+            font-family: "archia-med";
+            font-size: 29px;
+            color: #2E435C;
         }
 
         .mapboxgl-popup-tip {
@@ -69,26 +123,31 @@
         }
 
         .blue {
-            box-shadow: 0px 0px 0px 5px #005BB7, 0px 0px 0px 10px white, 0px 0px 0px 14px #005BB7;
-            background-color: #005BB7;
+            box-shadow: 0px 0px 0px 5px #7D29CC, 0px 0px 0px 10px white, 0px 0px 0px 14px #7D29CC;
+            background-color: #7D29CC;
         }
 
         #legend {
             position: absolute;
             bottom: 20px;
             left: 20px;
-            border: 3px solid gray;
-            border-radius: 50px;
+            border: 1px solid rgba(129, 129, 129, 0.5);
+            border-radius: 5px;
             display: flex;
             z-index: 1000;
             font-weight: bold;
             padding: 5px 10px;
+            background-color: white;
+            font-family: "proxima-bold";
+            -webkit-box-shadow: -1px 2px 23px 1px rgba(0, 0, 0, 0.34);
+            box-shadow: -1px 2px 23px 1px rgba(0, 0, 0, 0.34);
         }
 
         .legend-item {
             display: flex;
             justify-content: flex-start;
             align-items: center;
+            margin: 1px 10px;
         }
 
         .orange_ {
@@ -104,7 +163,7 @@
         }
 
         .blue_ {
-            color: #005BB7;
+            color: #7D29CC;
         }
     </style>
 </head>
@@ -113,19 +172,19 @@
     <div id="legend">
         <div class="legend-item">
             <div class="circle "></div>
-            <div class="orange_">Type 1</div>
+            <div class="orange_">Under construction</div>
         </div>
         <div class="legend-item">
             <div class="circle green"></div>
-            <div class="green_">Type 1</div>
+            <div class="green_">RNG</div>
         </div>
         <div class="legend-item">
             <div class="circle dblue"></div>
-            <div class="dblue_">Type 1</div>
+            <div class="dblue_">RNG and Electric</div>
         </div>
         <div class="legend-item">
             <div class="circle blue"></div>
-            <div class="blue_">Type 1</div>
+            <div class="blue_">Electric</div>
         </div>
 
     </div>
@@ -136,7 +195,7 @@
         const map = new mapboxgl.Map({
             container: 'map', // container ID
             style: 'mapbox://styles/serserser/cku0sad153cdu18mfdejzqo87', // style URL
-            center: { lng: -98.10019703622216, lat: 26.555935308408706 }, // starting position
+            center: { lng: -96.52873580301348, lat: 37.59114956199883 }, // starting position
             zoom: 3.5 // starting zoom
         });
         // Add zoom and rotation controls to the map.
@@ -146,12 +205,10 @@
         map.on('load', () => {
 
 
-
-
             map.addSource('data', {
                 type: 'geojson',
                 // Use a URL for the value for the `data` property.
-                data: 'gz_2010_us_040_00_500k.json'
+                data: 'data/gz_2010_us_040_00_500k.json'
             });
 
             map.addLayer({
@@ -172,7 +229,7 @@
             map.addSource('pins', {
                 type: 'geojson',
                 // Use a URL for the value for the `data` property.
-                data: 'data.json'
+                data: 'data/data.json'
             });
 
             map.addLayer({
@@ -180,7 +237,7 @@
                 'type': 'circle',
                 'source': 'pins',
                 'paint': {
-                    'circle-radius': 8,
+                    'circle-radius': 10,
                     "circle-opacity": 0,
                     "circle-stroke-width": 2,
                     "circle-stroke-color": ['get', 'color'],
@@ -191,7 +248,7 @@
                 'type': 'circle',
                 'source': 'pins',
                 'paint': {
-                    'circle-radius': 4,
+                    'circle-radius': 5,
                     'circle-stroke-width': 0,
                     'circle-color': ['get', 'color'],
 
@@ -213,20 +270,20 @@
 
                 const text = `
                     
-                <div style="">
+                <div style="margin:20px 10px;">
                     <div>
                         <h1>${props.name}</h1>
-                        <h4>Location</h4>
+                        <h4>Location TYPE - City, State</h4>
                     </div>
                     <div style="display:flex;justify-content: space-between; ">
 
                         <div>
-                            <div>Annual Output</div>
-                            <div>48 xyz</div>
+                            <div class="title">Annual Output</div>
+                            <div class="data">48 xyz</div>
                         </div>
                         <div>
-                            <div>Another Figure</div>
-                            <div>99999 abc</div>
+                            <div  class="title">Another Figure</div>
+                            <div class="data">99999 abc</div>
                         </div>
 
                     </div>
