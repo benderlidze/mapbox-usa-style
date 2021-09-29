@@ -29,12 +29,13 @@
     <script>
 
         const info = document.getElementById("info")
-        mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vyc2Vyc2VyIiwiYSI6ImNrZnBpaWF5azBpMWMyeHBmdzJpdno1NzgifQ.4vBDF2DNuk-beXljllf3Yg';
+
+        mapboxgl.accessToken = 'pk.eyJ1IjoibnNzcCIsImEiOiJja3F0Mzl4cGgzZzR1MndtbGQxYWV4OHBuIn0.BhwZAOb7MzGIitxxgVIz8g';
         const map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/light-v10',
-            center: [144.84971, -37.81385],
-            zoom: 15.5,
+            style: 'mapbox://styles/nssp/cks414kgq4ad018nsh1i3tfvh',
+            center: [144.6108, -37.8938],
+            zoom: 10,
             pitch: 45
         });
 
@@ -52,52 +53,77 @@
         }
 
         var a;
+        // function animateTo2D() {
+
+        //     const cb = map.getBearing() + 2
+        //     const cp = map.getPitch() - 1;
+        //     const zm = map.getZoom() - 0.02;
+
+        //     map.setBearing(cb)
+        //     map.setPitch(cp)
+        //     map.setZoom(zm)
+
+
+        //     getInfo()
+
+        //     if (Math.abs(cb) <= 3 && cp <= 0) {
+        //         console.log('stop',);
+        //         map.setBearing(0)
+        //         cancelAnimationFrame(a)
+        //         return;
+        //     }
+        //     a = requestAnimationFrame(animateTo2D);
+        // }
+
         function animateTo2D() {
-
-            const cb = map.getBearing() + 2
-            const cp = map.getPitch() - 1;
-            const zm = map.getZoom() - 0.02;
-
-            map.setBearing(cb)
-            map.setPitch(cp)
-            map.setZoom(zm)
-
 
             getInfo()
 
-            if (Math.abs(cb) <= 3 && cp <= 0) {
-                console.log('stop',);
-                map.setBearing(0)
-                cancelAnimationFrame(a)
-                return;
+            let gp = map.getPitch();
+            let gz = map.getZoom();
+
+            if (gp <= 0) {
+                gp = 0
+            } else {
+                gp = gp - 1
             }
+
+            if (gz <= 10) {
+                gz = 10
+            } else {
+                gz = gz - 0.02
+            }
+
+            map.setPitch(gp)
+            map.setZoom(gz)
+            map.setBearing(map.getBearing() + 1)
+
             a = requestAnimationFrame(animateTo2D);
         }
 
         function animateTo3D() {
 
-            const cb = map.getBearing() + 2
-            let cp = map.getPitch() + 1;
-            const zm = map.getZoom() + 0.02;
-
-            if (cp >= 45) {
-                cp = 45
-            }
-
-            map.setBearing(cb)
-            map.setPitch(cp)
-            map.setZoom(zm)
-
             getInfo()
 
+            let gp = map.getPitch();
+            let gz = map.getZoom();
 
-            if (cp >= 45 && zm >= 15) {
-                console.log('stop',);
-                map.setBearing(0)
-                cancelAnimationFrame(a)
-                rotateCamera(0)
-                return;
+            if (gp >= 45) {
+                gp = 45
+            } else {
+                gp = gp + 1
             }
+
+            if (gz >= 11) {
+                gz = 11
+            } else {
+                gz = gz + 0.02
+            }
+
+            map.setPitch(gp)
+            map.setZoom(gz)
+            map.setBearing(map.getBearing() + 1)
+
             a = requestAnimationFrame(animateTo3D);
         }
 
@@ -118,12 +144,15 @@
         document.getElementById("animate").addEventListener("click", () => {
 
             if (set) {
+                console.log('2d',);
                 cancelAnimationFrame(r)
+                cancelAnimationFrame(a)
                 animateTo2D()
             } else {
+                cancelAnimationFrame(a)
+                console.log('3d',);
                 animateTo3D()
             }
-
             set = !set
         })
 
