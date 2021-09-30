@@ -96,7 +96,7 @@
 
             map.setPitch(gp)
             map.setZoom(gz)
-            map.setBearing(map.getBearing() + 1)
+            map.setBearing(map.getBearing() - 0.2)
 
             if (+map.getBearing().toFixed() === 0) {
                 cancelAnimationFrame(a);
@@ -127,7 +127,7 @@
 
             map.setPitch(gp)
             map.setZoom(gz)
-            map.setBearing(map.getBearing() + 1)
+            map.setBearing(map.getBearing() - 0.2)
 
             a = requestAnimationFrame(animateTo3D);
         }
@@ -168,8 +168,8 @@
         map.on('load', () => {
             // Start the animation.
 
-            rotateCamera(0)
-            // Add 3d buildings and remove label layers to enhance the map
+            // rotateCamera(0)
+            // Add 3drotateCamera buildings and remove label layers to enhance the map
             const layers = map.getStyle().layers;
             for (const layer of layers) {
                 if (layer.type === 'symbol' && layer.layout['text-field']) {
