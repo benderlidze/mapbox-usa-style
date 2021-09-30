@@ -88,15 +88,20 @@
                 gp = gp - 1
             }
 
-            if (gz <= 10) {
-                gz = 10
+            if (gz >= 11) {
+                gz = 11
             } else {
-                gz = gz - 0.02
+                gz = gz + 0.02
             }
 
             map.setPitch(gp)
             map.setZoom(gz)
             map.setBearing(map.getBearing() + 1)
+
+            if (+map.getBearing().toFixed() === 0) {
+                cancelAnimationFrame(a);
+                return;
+            }
 
             a = requestAnimationFrame(animateTo2D);
         }
@@ -114,10 +119,10 @@
                 gp = gp + 1
             }
 
-            if (gz >= 11) {
-                gz = 11
+            if (gz <= 10) {
+                gz = 10
             } else {
-                gz = gz + 0.02
+                gz = gz - 0.02
             }
 
             map.setPitch(gp)
@@ -129,7 +134,11 @@
 
         function getInfo() {
 
-            const b = map.getBearing()
+            let b = map.getBearing();
+            if (b < 0) {
+                b = 360 - Math.abs(map.getBearing())
+            }
+
             const p = map.getPitch();
             const z = map.getZoom();
 
