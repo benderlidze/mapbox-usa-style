@@ -7,7 +7,8 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
 
     <style>
         @font-face {
@@ -56,7 +57,7 @@
         h4 {
             font-family: "proxima-reg";
             color: #818181;
-            font-size: 12px;
+            font-size: 14px;
             text-transform: uppercase;
             margin-top: 0px;
         }
@@ -226,10 +227,36 @@
             });
 
 
+            d3.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vRwUDXLbdns7anjb_T-jncWbfe_In31zVT9YlsibQifbY1YkDPGv1w90krJ7VsjStYgwwJWH5mPPiCa/pub?output=csv').then(data => {
+
+                const colors = {
+                    'RNG': "#00B24A",
+                    'Under Construction': "#f39717",
+                    'RNG and Electric': "#2D435D",
+                    'Electric': "#7D29CC",
+                }
+                const pinsData = data;
+                let bounds = new mapboxgl.LngLatBounds();
+                const pins = pinsData.map(i => {
+                    console.log('i', i);
+                    const [lat, lng] = i.Latlng.split(",");
+                    const latlng = [lng, lat];
+                    bounds.extend(latlng)
+                    return turf.point(latlng, { ...i, icon: i.icon, color: colors[i.Type] });
+                })
+
+                const collection = turf.featureCollection(pins)
+                map.getSource("pins").setData(collection)
+                map.fitBounds(bounds, { padding: 100, maxZoom: 15 })
+            })
+
+
             map.addSource('pins', {
-                type: 'geojson',
-                // Use a URL for the value for the `data` property.
-                data: 'data/data.json'
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                }
             });
 
             map.addLayer({
@@ -272,8 +299,8 @@
                     
                 <div style="margin:20px 10px;">
                     <div>
-                        <h1>${props.name}</h1>
-                        <h4>Location TYPE - City, State</h4>
+                        <h1>${props.Name}</h1>
+                        <h4>${props.Addr}</h4>
                     </div>
                     <div style="display:flex;justify-content: space-between; ">
 
