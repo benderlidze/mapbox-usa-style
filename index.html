@@ -191,11 +191,27 @@
     </div>
     <div id="map"></div>
     <script>
-        //d.features.forEach(i=>i.properties.color = ['#F39717','#00B24A', '#2D435D',"#005BB7"].random())
-        mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vyc2Vyc2VyIiwiYSI6ImNrZnBpaWF5azBpMWMyeHBmdzJpdno1NzgifQ.4vBDF2DNuk-beXljllf3Yg';
+        mapboxgl.accessToken = 'pk.eyJ1IjoicmFwaGRlbHJpbyIsImEiOiJja3VnanM0ZjIwMmhrMm5xdHlkbWxuMnU1In0.N7nPMuJI0pq3P88xDwYWDg';
+
         const map = new mapboxgl.Map({
             container: 'map', // container ID
-            style: 'mapbox://styles/serserser/cku0sad153cdu18mfdejzqo87', // style URL
+            style:  {
+            "version": 8,
+            "name": "blank",
+            "sources": {
+                "openmaptiles": {
+                    "type": "vector",
+                    "url": ""
+                }
+            },
+            "layers": [{
+                "id": "background",
+                "type": "background",
+                "paint": {
+                    "background-color": "white"
+                }
+            }]
+        }, // style URL
             center: { lng: -96.52873580301348, lat: 37.59114956199883 }, // starting position
             zoom: 3.5 // starting zoom
         });
